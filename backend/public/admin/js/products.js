@@ -81,15 +81,12 @@ async function loadProducts() {
     const tr = document.createElement('tr');
 
     const tdImg = document.createElement('td');
+    tdImg.className = 'image-cell';
     if (p.imageUrl) {
       const img = document.createElement('img');
+      img.className = 'prod-thumb';
       img.src = p.imageUrl;
       img.alt = '';
-      img.style.width = '48px';
-      img.style.height = '36px';
-      img.style.objectFit = 'cover';
-      img.style.borderRadius = '6px';
-      img.style.border = '1px solid #e5e7eb';
       tdImg.appendChild(img);
     } else {
       tdImg.textContent = '-';
