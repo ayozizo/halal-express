@@ -40,8 +40,8 @@ model Category {
 
   parent     Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
   children   Category[] @relation("CategoryToCategory")
-  products   Product[]  @relation("ProductCategory", references: [id])
-  subProducts Product[] @relation("ProductSubCategory", references: [id])
+  products   Product[]  @relation("ProductCategory")
+  subProducts Product[] @relation("ProductSubCategory")
 
   @@index([parentId])
 }
