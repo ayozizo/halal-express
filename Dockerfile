@@ -17,4 +17,4 @@ RUN npx prisma generate
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node src/index.js"]
+CMD ["sh", "-c", "i=0; until npx prisma migrate deploy; do i=$((i+1)); if [ $i -ge 12 ]; then echo 'Prisma migrate failed after retries' >&2; exit 1; fi; echo 'Prisma migrate failed (likely DB not ready). Retrying...' >&2; sleep 3; done; node src/index.js"]
