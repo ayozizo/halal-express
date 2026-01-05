@@ -51,7 +51,7 @@ router.post(
 
     const token = signToken({ id: user.id, email: user.email, isAdmin: user.isAdmin });
     res.cookie('token', token, cookieOptions());
-    res.json(user);
+    res.json({ ...user, token });
   },
 );
 
@@ -85,7 +85,27 @@ router.post(
       email: user.email,
       isAdmin: user.isAdmin,
       name: user.name,
+      phone: user.phone,
+      address: user.address,
+      createdAt: user.createdAt,
+      token,
     });
+  },
+);
+
+router.post(
+  '/reset-password',
+  validate(
+    z.object({
+      body: z.object({
+        email: z.string().email(),
+      }),
+      query: z.any(),
+      params: z.any(),
+    }),
+  ),
+  async (req, res) => {
+    res.json({ ok: true });
   },
 );
 

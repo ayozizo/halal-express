@@ -12,6 +12,7 @@ const IMG = {
   chicken: 'https://images.unsplash.com/photo-1604908176997-125f25cc500f?auto=format&fit=crop&w=900&q=60',
   fish: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&q=60',
   salmon: 'https://images.unsplash.com/photo-1617196034796-73c924b58750?auto=format&fit=crop&w=900&q=60',
+  prawns: 'https://images.unsplash.com/photo-1604909052610-75af2f06d9a4?auto=format&fit=crop&w=900&q=60',
   rice: 'https://images.unsplash.com/photo-1604909053195-27733b2012f4?auto=format&fit=crop&w=900&q=60',
   oil: 'https://images.unsplash.com/photo-1623165425768-9b3a7be3c7ec?auto=format&fit=crop&w=900&q=60',
   spice: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=900&q=60',
@@ -26,6 +27,7 @@ const IMG = {
 function pickImage(product) {
   const name = `${product.name || ''}`.toLowerCase();
 
+  if (name.includes('prawns') || name.includes('shrimp')) return IMG.prawns;
   if (name.includes('salmon')) return IMG.salmon;
   if (name.includes('fish') || name.includes('tilapia') || name.includes('sea')) return IMG.fish;
 

@@ -11,6 +11,75 @@ function placeholderUrl(text, size) {
   return `https://via.placeholder.com/${size}?text=${encoded}`;
 }
 
+function isPlaceholder(url) {
+  if (!url) return true;
+  const u = String(url).toLowerCase();
+  return u.includes('picsum.photos') || u.includes('via.placeholder.com') || u.includes('placehold') || u.includes('dummyimage');
+}
+
+const IMG = {
+  meat: 'https://images.unsplash.com/photo-1547637205-fde0c9011f9d?auto=format&fit=crop&w=900&q=60',
+  beef: 'https://images.unsplash.com/photo-1604909052743-94e546612f6c?auto=format&fit=crop&w=900&q=60',
+  lamb: 'https://images.unsplash.com/photo-1603048297172-c92544798d84?auto=format&fit=crop&w=900&q=60',
+  chicken: 'https://images.unsplash.com/photo-1604908176997-125f25cc500f?auto=format&fit=crop&w=900&q=60',
+  fish: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&q=60',
+  salmon: 'https://images.unsplash.com/photo-1617196034796-73c924b58750?auto=format&fit=crop&w=900&q=60',
+  prawns: 'https://images.unsplash.com/photo-1604909052610-75af2f06d9a4?auto=format&fit=crop&w=900&q=60',
+  rice: 'https://images.unsplash.com/photo-1604909053195-27733b2012f4?auto=format&fit=crop&w=900&q=60',
+  oil: 'https://images.unsplash.com/photo-1623165425768-9b3a7be3c7ec?auto=format&fit=crop&w=900&q=60',
+  spice: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=900&q=60',
+  flour: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=60',
+  honey: 'https://images.unsplash.com/photo-1471943038886-87c772c31367?auto=format&fit=crop&w=900&q=60',
+  tea: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=900&q=60',
+  canned: 'https://images.unsplash.com/photo-1580915411954-282cb1b0d780?auto=format&fit=crop&w=900&q=60',
+  snacks: 'https://images.unsplash.com/photo-1604909052936-7b4957332b0e?auto=format&fit=crop&w=900&q=60',
+  detergent: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=900&q=60',
+  nuts: 'https://images.unsplash.com/photo-1561047029-3000c68339ca?auto=format&fit=crop&w=900&q=60',
+  diapers: 'https://images.unsplash.com/photo-1599447307744-6b7864b1f1ff?auto=format&fit=crop&w=900&q=60',
+  wipes: 'https://images.unsplash.com/photo-1582719478185-2f2c87a66d9b?auto=format&fit=crop&w=900&q=60',
+  formula: 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=900&q=60',
+  default: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=60',
+};
+
+function pickImageUrl(name) {
+  const n = String(name || '').toLowerCase();
+  if (n.includes('prawns') || n.includes('shrimp')) return IMG.prawns;
+  if (n.includes('salmon')) return IMG.salmon;
+  if (n.includes('fish') || n.includes('tilapia') || n.includes('sea')) return IMG.fish;
+  if (n.includes('beef') || n.includes('steak') || n.includes('mince') || n.includes('ground')) return IMG.beef;
+  if (n.includes('lamb')) return IMG.lamb;
+  if (n.includes('chicken')) return IMG.chicken;
+  if (n.includes('rice') || n.includes('basmati')) return IMG.rice;
+  if (n.includes('oil') || n.includes('ghee') || n.includes('sunflower')) return IMG.oil;
+  if (n.includes('cumin') || n.includes('spice') || n.includes('masala')) return IMG.spice;
+  if (n.includes('detergent') || n.includes('laundry') || n.includes('clean')) return IMG.detergent;
+  if (n.includes('nuts') || n.includes('almond') || n.includes('pistach')) return IMG.nuts;
+  if (n.includes('diaper')) return IMG.diapers;
+  if (n.includes('wipe')) return IMG.wipes;
+  if (n.includes('formula')) return IMG.formula;
+  return IMG.default;
+}
+
+function pickCategoryImageUrl(name) {
+  const n = String(name || '').toLowerCase();
+  if (n === 'meat') return IMG.meat;
+  if (n.includes('beef')) return IMG.beef;
+  if (n.includes('lamb')) return IMG.lamb;
+  if (n.includes('chicken')) return IMG.chicken;
+  if (n.includes('fish')) return IMG.fish;
+  if (n.includes('baby')) return IMG.diapers;
+  if (n.includes('rice') || n.includes('grains') || n.includes('basmati')) return IMG.rice;
+  if (n.includes('sugar') || n.includes('flour') || n.includes('baking')) return IMG.flour;
+  if (n.includes('oil') || n.includes('ghee')) return IMG.oil;
+  if (n.includes('spice') || n.includes('herb') || n.includes('cumin')) return IMG.spice;
+  if (n.includes('honey') || n.includes('natural')) return IMG.honey;
+  if (n.includes('household') || n.includes('detergent')) return IMG.detergent;
+  if (n.includes('snacks') || n.includes('dry') || n.includes('nuts')) return IMG.snacks;
+  if (n.includes('tea') || n.includes('coffee')) return IMG.tea;
+  if (n.includes('canned') || n.includes('jar')) return IMG.canned;
+  return IMG.default;
+}
+
 async function ensureCategory({ name, parentId = null, imageUrl = null, order = 0 }) {
   const existing = await prisma.category.findFirst({
     where: {
@@ -19,13 +88,36 @@ async function ensureCategory({ name, parentId = null, imageUrl = null, order = 
     },
   });
 
-  if (existing) return existing;
+  const resolvedImageUrl =
+    !imageUrl || isPlaceholder(imageUrl)
+      ? pickCategoryImageUrl(name) || imageUrl || placeholderUrl(name, '900x600')
+      : imageUrl;
+
+  if (existing) {
+    const needsUpdate =
+      existing.parentId !== parentId ||
+      existing.order !== order ||
+      !existing.imageUrl ||
+      isPlaceholder(existing.imageUrl);
+
+    if (!needsUpdate) return existing;
+
+    return prisma.category.update({
+      where: { id: existing.id },
+      data: {
+        parentId,
+        imageUrl: resolvedImageUrl,
+        order,
+        isActive: true,
+      },
+    });
+  }
 
   return prisma.category.create({
     data: {
       name,
       parentId,
-      imageUrl,
+      imageUrl: resolvedImageUrl,
       order,
       isActive: true,
     },
@@ -48,18 +140,38 @@ async function ensureProduct({
     },
   });
 
-  const resolvedImageUrl = imageUrl || placeholderUrl(name, '900x600');
+  const resolvedImageUrl =
+    !imageUrl || isPlaceholder(imageUrl)
+      ? pickImageUrl(name) || imageUrl || placeholderUrl(name, '900x600')
+      : imageUrl;
+  const basePriceStr = String(basePrice);
 
   if (existing) {
-    if (!existing.imageUrl) {
-      return prisma.product.update({
-        where: { id: existing.id },
-        data: {
-          imageUrl: resolvedImageUrl,
-        },
-      });
-    }
-    return existing;
+    const existingOptions = Array.isArray(existing.optionsJson) ? existing.optionsJson : [];
+    const needsUpdate =
+      existing.description !== description ||
+      String(existing.basePrice) !== basePriceStr ||
+      existing.categoryId !== categoryId ||
+      existing.subCategoryId !== subCategoryId ||
+      JSON.stringify(existingOptions) !== JSON.stringify(options) ||
+      !existing.imageUrl ||
+      isPlaceholder(existing.imageUrl);
+
+    if (!needsUpdate) return existing;
+
+    return prisma.product.update({
+      where: { id: existing.id },
+      data: {
+        name,
+        description,
+        imageUrl: resolvedImageUrl,
+        basePrice: basePriceStr,
+        isAvailable: true,
+        optionsJson: options,
+        categoryId,
+        subCategoryId,
+      },
+    });
   }
 
   return prisma.product.create({
@@ -146,6 +258,12 @@ async function seedDemoData() {
     order: 1,
   });
 
+  await ensureCategory({
+    name: 'Sugar, Flour & Baking',
+    imageUrl: placeholderUrl('Sugar, Flour & Baking', '800x500'),
+    order: 4,
+  });
+
   const oilsGhee = await ensureCategory({
     name: 'Oils & Ghee',
     imageUrl: placeholderUrl('Oils & Ghee', '800x500'),
@@ -170,6 +288,12 @@ async function seedDemoData() {
     order: 1,
   });
 
+  await ensureCategory({
+    name: 'Honey & Natural Products',
+    imageUrl: placeholderUrl('Honey & Natural Products', '800x500'),
+    order: 7,
+  });
+
   const household = await ensureCategory({
     name: 'Household Essentials',
     imageUrl: placeholderUrl('Household', '800x500'),
@@ -192,6 +316,18 @@ async function seedDemoData() {
     parentId: snacksDry.id,
     imageUrl: placeholderUrl('Nuts', '800x500'),
     order: 1,
+  });
+
+  await ensureCategory({
+    name: 'Tea & Coffee',
+    imageUrl: placeholderUrl('Tea & Coffee', '800x500'),
+    order: 10,
+  });
+
+  await ensureCategory({
+    name: 'Canned & Jar Food',
+    imageUrl: placeholderUrl('Canned & Jar Food', '800x500'),
+    order: 11,
   });
 
   await ensureProduct({
@@ -234,6 +370,239 @@ async function seedDemoData() {
   });
 
   await ensureProduct({
+    name: 'Striploin / Sirloin',
+    description: 'Halal striploin/sirloin, great for steaks and roasting.',
+    imageUrl: placeholderUrl('Sirloin', '600x400'),
+    basePrice: '22.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'cutStyle', label: 'Cut style', values: ['Whole piece', 'Sliced thin (for steak / stir fry)', 'Strips (for stir fry)'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Ribeye',
+    description: 'Juicy halal ribeye for grilling or pan sear.',
+    imageUrl: placeholderUrl('Ribeye', '600x400'),
+    basePrice: '24.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'cutStyle', label: 'Cut style', values: ['Whole piece', 'Sliced thin (for steak / stir fry)'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Fillet (Tenderloin)',
+    description: 'Premium halal beef tenderloin / fillet.',
+    imageUrl: placeholderUrl('Tenderloin', '600x400'),
+    basePrice: '29.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'cutStyle', label: 'Cut style', values: ['Whole piece', 'Sliced thin (for steak / stir fry)'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Beef Roast',
+    description: 'Halal beef roast cut, ideal for oven roasting.',
+    imageUrl: placeholderUrl('Beef Roast', '600x400'),
+    basePrice: '21.49',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'cutStyle', label: 'Cut style', values: ['Whole piece'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Topside / Silverside',
+    description: 'Halal topside/silverside, good for roast or slow cook.',
+    imageUrl: placeholderUrl('Topside', '600x400'),
+    basePrice: '20.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'cutStyle', label: 'Cut style', values: ['Whole piece', 'Medium pieces', 'Small pieces'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Brisket',
+    description: 'Halal beef brisket, ideal for slow cooking.',
+    imageUrl: placeholderUrl('Brisket', '600x400'),
+    basePrice: '18.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'cutStyle', label: 'Cut style', values: ['Whole piece', 'Medium pieces', 'Small pieces'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Beef Ribs',
+    description: 'Halal beef ribs, great for BBQ.',
+    imageUrl: placeholderUrl('Beef Ribs', '600x400'),
+    basePrice: '17.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'bones', label: 'Bones', values: ['With bone', 'Boneless'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Short ribs',
+    description: 'Halal short ribs, excellent for slow cooking.',
+    imageUrl: placeholderUrl('Short Ribs', '600x400'),
+    basePrice: '18.49',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'bones', label: 'Bones', values: ['With bone', 'Boneless'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Rib rack',
+    description: 'Halal rib rack, ideal for roasting or BBQ.',
+    imageUrl: placeholderUrl('Rib Rack', '600x400'),
+    basePrice: '19.49',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'bones', label: 'Bones', values: ['With bone', 'Boneless'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Beef Shank (for soup)',
+    description: 'Halal beef shank, perfect for soups and stock.',
+    imageUrl: placeholderUrl('Beef Shank', '600x400'),
+    basePrice: '14.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'bones', label: 'Bones', values: ['With bone', 'Boneless'] },
+      { type: 'cutStyle', label: 'Cut style', values: ['Whole piece', 'Medium pieces', 'Small pieces'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Beef Bones',
+    description: 'Halal beef bones for stock, soup and broth.',
+    imageUrl: placeholderUrl('Beef Bones', '600x400'),
+    basePrice: '9.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'boneType', label: 'Bone type', values: ['Marrow bone', 'Soup bone'], isRequired: true },
+      { type: 'boneSize', label: 'Size', values: ['Whole bone', 'Cut in half', 'Cut small pieces'], isRequired: true },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Marrow bones',
+    description: 'Halal marrow bones for rich broth.',
+    imageUrl: placeholderUrl('Marrow Bones', '600x400'),
+    basePrice: '10.49',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'boneSize', label: 'Size', values: ['Whole bone', 'Cut in half', 'Cut small pieces'], isRequired: true },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Soup bones',
+    description: 'Halal soup bones for stock and soup.',
+    imageUrl: placeholderUrl('Soup Bones', '600x400'),
+    basePrice: '9.49',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'boneSize', label: 'Size', values: ['Whole bone', 'Cut in half', 'Cut small pieces'], isRequired: true },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Beef Liver',
+    description: 'Fresh halal beef liver.',
+    imageUrl: placeholderUrl('Beef Liver', '600x400'),
+    basePrice: '11.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'cutStyle', label: 'Cut style', values: ['Whole piece', 'Sliced thin (for steak / stir fry)'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Beef Heart',
+    description: 'Fresh halal beef heart.',
+    imageUrl: placeholderUrl('Beef Heart', '600x400'),
+    basePrice: '12.49',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+      { type: 'cutStyle', label: 'Cut style', values: ['Whole piece', 'Medium pieces', 'Small pieces'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Beef Kidney',
+    description: 'Fresh halal beef kidney.',
+    imageUrl: placeholderUrl('Beef Kidney', '600x400'),
+    basePrice: '9.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Beef Tongue (if you want)',
+    description: 'Halal beef tongue.',
+    imageUrl: placeholderUrl('Beef Tongue', '600x400'),
+    basePrice: '15.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Beef Fat (suet / trimmings)',
+    description: 'Halal beef fat / suet for cooking.',
+    imageUrl: placeholderUrl('Beef Fat', '600x400'),
+    basePrice: '6.99',
+    categoryId: meat.id,
+    subCategoryId: beef.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg', 'Custom'], isRequired: true },
+    ],
+  });
+
+  await ensureProduct({
     name: 'Lamb Chops',
     description: 'Tender halal lamb chops, great for BBQ or grill.',
     imageUrl: placeholderUrl('Lamb Chops', '600x400'),
@@ -242,6 +611,20 @@ async function seedDemoData() {
     subCategoryId: lamb.id,
     options: [
       { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg'], isRequired: true },
+      { type: 'bones', label: 'Bones', values: ['With bone', 'Boneless'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Lamb Leg',
+    description: 'Whole or half halal lamb leg for roast or curry.',
+    imageUrl: placeholderUrl('Lamb Leg', '600x400'),
+    basePrice: '24.99',
+    categoryId: meat.id,
+    subCategoryId: lamb.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['1kg', '1.5kg', '2kg'], isRequired: true },
+      { type: 'cutStyle', label: 'Cut style', values: ['Whole', 'Medium pieces', 'Small pieces', 'Chops'] },
       { type: 'bones', label: 'Bones', values: ['With bone', 'Boneless'] },
     ],
   });
@@ -275,6 +658,18 @@ async function seedDemoData() {
   });
 
   await ensureProduct({
+    name: 'Chicken Wings',
+    description: 'Halal chicken wings, great for frying or BBQ.',
+    imageUrl: placeholderUrl('Chicken Wings', '600x400'),
+    basePrice: '8.99',
+    categoryId: meat.id,
+    subCategoryId: chicken.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg'], isRequired: true },
+    ],
+  });
+
+  await ensureProduct({
     name: 'Salmon Fillet',
     description: 'Fresh salmon fillet, perfect for oven or pan.',
     imageUrl: placeholderUrl('Salmon Fillet', '600x400'),
@@ -285,6 +680,19 @@ async function seedDemoData() {
       { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg', '2kg'], isRequired: true },
       { type: 'preparation', label: 'Preparation', values: ['Whole, not cleaned', 'Cleaned', 'Fillet', 'Steaks'] },
       { type: 'bones', label: 'Bones', values: ['With bones', 'Boneless'] },
+    ],
+  });
+
+  await ensureProduct({
+    name: 'Prawns / Shrimp',
+    description: 'Halal prawns, choose with shell or peeled.',
+    imageUrl: placeholderUrl('Prawns', '600x400'),
+    basePrice: '18.99',
+    categoryId: meat.id,
+    subCategoryId: fish.id,
+    options: [
+      { type: 'weight', label: 'Weight', values: ['500g', '1kg', '1.5kg'], isRequired: true },
+      { type: 'preparation', label: 'Preparation', values: ['With shell', 'Peeled'] },
     ],
   });
 
@@ -369,15 +777,16 @@ async function seedDemoData() {
   });
 
   // Backfill images for any existing products without imageUrl
-  const missing = await prisma.product.findMany({
-    where: { imageUrl: null },
-    select: { id: true, name: true },
+  const existingProducts = await prisma.product.findMany({
+    select: { id: true, name: true, imageUrl: true },
   });
 
-  for (const p of missing) {
+  for (const p of existingProducts) {
+    if (p.imageUrl && !isPlaceholder(p.imageUrl)) continue;
+
     await prisma.product.update({
       where: { id: p.id },
-      data: { imageUrl: placeholderUrl(p.name, '600x400') },
+      data: { imageUrl: pickImageUrl(p.name) || placeholderUrl(p.name, '600x400') },
     });
   }
 }
