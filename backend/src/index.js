@@ -9,6 +9,7 @@ const morgan = require('morgan');
 
 const { prisma } = require('./lib/prisma');
 const { ensureAdminUser } = require('./startup/ensureAdmin');
+const { seedDemoData } = require('./startup/seedDemo');
 
 const authRoutes = require('./routes/auth');
 const categoriesRoutes = require('./routes/categories');
@@ -67,6 +68,7 @@ const port = Number(process.env.PORT || 8080);
 async function start() {
   await prisma.$connect();
   await ensureAdminUser();
+  await seedDemoData();
   app.listen(port, () => {
     // eslint-disable-next-line no-console
     console.log(`Backend listening on :${port}`);
