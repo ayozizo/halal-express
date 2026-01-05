@@ -150,6 +150,7 @@
             <table class="table">
               <thead>
                 <tr>
+                  <th>Image</th>
                   <th>Name</th>
                   <th>Price</th>
                   <th>Available</th>
@@ -186,6 +187,9 @@
             <div class="field">
               <label>Image URL</label>
               <input id="prod-imageUrl" class="input" />
+              <div style="margin-top:8px">
+                <img id="prod-imagePreview" alt="" style="width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;display:none" />
+              </div>
             </div>
             <div class="field">
               <label>Options JSON (array)</label>

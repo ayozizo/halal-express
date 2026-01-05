@@ -9,6 +9,7 @@
     "start": "node src/index.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
+    "images:backfill": "node src/scripts/backfillProductImages.js",
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
