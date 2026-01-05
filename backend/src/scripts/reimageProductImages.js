@@ -1,4 +1,5 @@
 const { prisma } = require('../lib/prisma');
+const crypto = require('crypto');
 
 function isPlaceholder(url) {
   if (!url) return true;
@@ -24,28 +25,43 @@ const IMG = {
   default: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=60',
 };
 
+function sigFor(product) {
+  const seed = `${product.id || ''}:${product.name || ''}`;
+  const hex = crypto.createHash('md5').update(seed).digest('hex').slice(0, 8);
+  return parseInt(hex, 16) % 1000;
+}
+
+function unsplashSource(tags, sig) {
+  const safeTags = (tags || []).filter(Boolean).slice(0, 6).map((t) => encodeURIComponent(String(t).trim().toLowerCase()));
+  const q = safeTags.join(',') || 'food';
+  return `https://source.unsplash.com/featured/900x600/?${q}&sig=${sig}`;
+}
+
 function pickImage(product) {
   const name = `${product.name || ''}`.toLowerCase();
 
-  if (name.includes('prawns') || name.includes('shrimp')) return IMG.prawns;
-  if (name.includes('salmon')) return IMG.salmon;
-  if (name.includes('fish') || name.includes('tilapia') || name.includes('sea')) return IMG.fish;
+  const tags = ['food'];
 
-  if (name.includes('beef') || name.includes('steak') || name.includes('mince') || name.includes('ground')) return IMG.beef;
-  if (name.includes('lamb')) return IMG.lamb;
-  if (name.includes('chicken')) return IMG.chicken;
+  if (name.includes('prawns') || name.includes('shrimp')) tags.push('prawns', 'shrimp', 'seafood');
+  else if (name.includes('salmon')) tags.push('salmon', 'fish', 'seafood');
+  else if (name.includes('fish') || name.includes('tilapia') || name.includes('sea')) tags.push('fish', 'seafood');
 
-  if (name.includes('rice') || name.includes('basmati')) return IMG.rice;
-  if (name.includes('oil') || name.includes('ghee') || name.includes('sunflower')) return IMG.oil;
-  if (name.includes('cumin') || name.includes('spice') || name.includes('masala')) return IMG.spice;
-  if (name.includes('detergent') || name.includes('laundry') || name.includes('clean')) return IMG.detergent;
-  if (name.includes('nuts') || name.includes('almond') || name.includes('pistach')) return IMG.nuts;
+  else if (name.includes('beef') || name.includes('steak') || name.includes('mince') || name.includes('ground')) tags.push('beef', 'meat');
+  else if (name.includes('lamb')) tags.push('lamb', 'meat');
+  else if (name.includes('chicken')) tags.push('chicken', 'poultry');
 
-  if (name.includes('diaper')) return IMG.diapers;
-  if (name.includes('wipe')) return IMG.wipes;
-  if (name.includes('formula')) return IMG.formula;
+  else if (name.includes('rice') || name.includes('basmati')) tags.push('rice');
+  else if (name.includes('oil') || name.includes('ghee') || name.includes('sunflower')) tags.push('cooking', 'oil');
+  else if (name.includes('cumin') || name.includes('spice') || name.includes('masala')) tags.push('spices');
+  else if (name.includes('detergent') || name.includes('laundry') || name.includes('clean')) tags.push('laundry', 'detergent');
+  else if (name.includes('nuts') || name.includes('almond') || name.includes('pistach')) tags.push('nuts');
 
-  return IMG.default;
+  else if (name.includes('diaper')) tags.push('baby', 'diapers');
+  else if (name.includes('wipe')) tags.push('baby', 'wipes');
+  else if (name.includes('formula')) tags.push('baby', 'formula');
+
+  const sig = sigFor(product);
+  return unsplashSource(tags, sig);
 }
 
 async function main() {
@@ -67,13 +83,7 @@ async function main() {
 
   for (const p of products) {
     const nextUrl = pickImage(p);
-    const shouldUpdate =
-      !p.imageUrl ||
-      isPlaceholder(p.imageUrl) ||
-      p.imageUrl === IMG.default ||
-      (mostCommonCount >= 5 && p.imageUrl === mostCommonUrl);
-
-    if (!shouldUpdate) continue;
+    const shouldUpdate = true;
 
     await prisma.product.update({
       where: { id: p.id },

@@ -87,6 +87,12 @@ async function loadProducts() {
       img.className = 'prod-thumb';
       img.src = p.imageUrl;
       img.alt = '';
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      img.onerror = () => {
+        img.remove();
+        tdImg.textContent = '-';
+      };
       tdImg.appendChild(img);
     } else {
       tdImg.textContent = '-';
@@ -102,8 +108,7 @@ async function loadProducts() {
     tdAvail.textContent = String(p.isAvailable);
 
     const tdActions = document.createElement('td');
-    tdActions.style.display = 'flex';
-    tdActions.style.gap = '8px';
+    tdActions.className = 'actions-cell';
 
     const btnEdit = document.createElement('button');
     btnEdit.className = 'btn secondary small';
