@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Halal Express Admin</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-title">Halal Express</div>
+        <div class="brand-subtitle">Admin Panel</div>
+      </div>
+      <div class="topbar-right">
+        <span id="topbar-user" class="muted"></span>
+        <button id="btn-logout" class="btn secondary">Logout</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <a class="nav" href="#/dashboard">Dashboard</a>
+        <a class="nav" href="#/categories">Categories</a>
+        <a class="nav" href="#/products">Products</a>
+        <a class="nav" href="#/orders">Orders</a>
+        <a class="nav" href="#/invoices">Invoices</a>
+        <a class="nav" href="#/users">Users</a>
+      </aside>
+
+      <main class="main">
+        <div id="toast" class="toast" style="display:none"></div>
+
+        <section id="view-login" class="view" style="display:none">
+          <div class="card" style="max-width:520px">
+            <h2 style="margin-top:0">Admin Login</h2>
+            <p class="muted" style="margin-top:0">Use the admin credentials you configured in Railway environment variables.</p>
+            <form id="login-form">
+              <div class="field">
+                <label>Email</label>
+                <input id="login-email" class="input" type="email" autocomplete="username" required />
+              </div>
+              <div class="field">
+                <label>Password</label>
+                <input id="login-password" class="input" type="password" autocomplete="current-password" required />
+              </div>
+              <div id="login-error" class="error" style="display:none"></div>
+              <button class="btn" type="submit">Sign in</button>
+            </form>
+          </div>
+        </section>
+
+        <section id="view-dashboard" class="view" style="display:none">
+          <div class="card">
+            <h2 style="margin-top:0">Dashboard</h2>
+            <div class="row">
+              <span class="badge">UID</span>
+              <code id="me-id"></code>
+            </div>
+            <div class="row" style="margin-top:8px">
+              <span class="badge">Email</span>
+              <span id="me-email"></span>
+            </div>
+            <div class="row" style="margin-top:8px">
+              <span class="badge">Admin</span>
+              <span id="me-admin"></span>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-categories" class="view" style="display:none">
+          <div class="row" style="margin-bottom:12px">
+            <h2 style="margin:0">Categories</h2>
+            <div class="space"></div>
+            <button id="cat-back" class="btn secondary">Back</button>
+            <button id="cat-refresh" class="btn secondary">Refresh</button>
+          </div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="muted" id="cat-path">Path: Top level</div>
+          </div>
+          <div class="card" style="margin-bottom:12px">
+            <h3 style="margin-top:0">List</h3>
+            <div id="cat-error" class="error" style="display:none"></div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Active</th>
+                  <th>Order</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="cat-tbody"></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Add / Edit</h3>
+            <div class="row" style="margin-bottom:12px">
+              <div style="flex:2">
+                <label>Name</label>
+                <input id="cat-name" class="input" />
+              </div>
+              <div style="flex:3">
+                <label>Image URL (optional)</label>
+                <input id="cat-imageUrl" class="input" />
+              </div>
+            </div>
+            <div class="row" style="margin-bottom:12px">
+              <div style="width:140px">
+                <label>Order</label>
+                <input id="cat-order" class="input" type="number" value="0" />
+              </div>
+              <div style="width:220px">
+                <label>Active</label>
+                <select id="cat-active" class="input">
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              </div>
+              <div class="space"></div>
+              <button id="cat-save" class="btn">Save</button>
+              <button id="cat-clear" class="btn secondary">Clear</button>
+            </div>
+            <div class="muted">Editing category id: <code id="cat-editing">(new)</code></div>
+          </div>
+        </section>
+
+        <section id="view-products" class="view" style="display:none">
+          <div class="row" style="margin-bottom:12px">
+            <h2 style="margin:0">Products</h2>
+            <div class="space"></div>
+            <button id="prod-refresh" class="btn secondary">Refresh</button>
+          </div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="row">
+              <div style="flex:1">
+                <label>Category</label>
+                <select id="prod-category" class="input"></select>
+              </div>
+              <div style="flex:1">
+                <label>Subcategory</label>
+                <select id="prod-subcategory" class="input"></select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:12px">
+            <h3 style="margin-top:0">List</h3>
+            <div id="prod-error" class="error" style="display:none"></div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Available</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="prod-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Add / Edit</h3>
+            <div class="row" style="margin-bottom:12px">
+              <div style="flex:2">
+                <label>Name</label>
+                <input id="prod-name" class="input" />
+              </div>
+              <div style="width:180px">
+                <label>Base price</label>
+                <input id="prod-price" class="input" />
+              </div>
+              <div style="width:220px">
+                <label>Available</label>
+                <select id="prod-available" class="input">
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>Description</label>
+              <textarea id="prod-description" class="input" rows="3"></textarea>
+            </div>
+            <div class="field">
+              <label>Image URL</label>
+              <input id="prod-imageUrl" class="input" />
+            </div>
+            <div class="field">
+              <label>Options JSON (array)</label>
+              <textarea id="prod-options" class="input" rows="6">[]</textarea>
+            </div>
+            <div class="row">
+              <button id="prod-save" class="btn">Save</button>
+              <button id="prod-clear" class="btn secondary">Clear</button>
+              <div class="space"></div>
+              <div class="muted">Editing product id: <code id="prod-editing">(new)</code></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-orders" class="view" style="display:none">
+          <div class="row" style="margin-bottom:12px">
+            <h2 style="margin:0">Orders</h2>
+            <div class="space"></div>
+            <button id="orders-refresh" class="btn secondary">Refresh</button>
+          </div>
+          <div class="card">
+            <div id="orders-error" class="error" style="display:none"></div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Id</th>
+                  <th>User</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                  <th>Items</th>
+                  <th>Invoice</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="view-invoices" class="view" style="display:none">
+          <div class="row" style="margin-bottom:12px">
+            <h2 style="margin:0">Invoices</h2>
+            <div class="space"></div>
+            <button id="inv-refresh" class="btn secondary">Refresh</button>
+          </div>
+          <div class="card">
+            <div id="inv-error" class="error" style="display:none"></div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Number</th>
+                  <th>Order</th>
+                  <th>User</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Issued</th>
+                  <th>PDF</th>
+                </tr>
+              </thead>
+              <tbody id="inv-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="view-users" class="view" style="display:none">
+          <div class="row" style="margin-bottom:12px">
+            <h2 style="margin:0">Users</h2>
+            <div class="space"></div>
+            <button id="users-refresh" class="btn secondary">Refresh</button>
+          </div>
+          <div class="card">
+            <div id="users-error" class="error" style="display:none"></div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Id</th>
+                  <th>Email</th>
+                  <th>Name</th>
+                  <th>Admin</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./js/api.js"></script>
+    <script src="./js/state.js"></script>
+    <script src="./js/dashboard.js"></script>
+    <script src="./js/categories.js"></script>
+    <script src="./js/products.js"></script>
+    <script src="./js/orders.js"></script>
+    <script src="./js/invoices.js"></script>
+    <script src="./js/users.js"></script>
+    <script src="./js/router.js"></script>
+    <script src="./js/main.js"></script>
+  </body>
+</html>
