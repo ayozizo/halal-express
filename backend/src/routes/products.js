@@ -7,13 +7,11 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const subCategoryId = req.query.subCategoryId ? String(req.query.subCategoryId) : null;
-  const categoryId = req.query.categoryId ? String(req.query.categoryId) : null;
-  if (!subCategoryId && !categoryId) return res.json([]);
+  if (!subCategoryId) return res.json([]);
 
   const products = await prisma.product.findMany({
     where: {
-      ...(subCategoryId ? { subCategoryId } : {}),
-      ...(categoryId ? { categoryId } : {}),
+      subCategoryId,
       isAvailable: true,
     },
     orderBy: [{ createdAt: 'desc' }],

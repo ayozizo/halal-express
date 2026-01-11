@@ -1,5 +1,5 @@
 function statusSelect(order) {
-  const statuses = ['pending', 'inProgress', 'delivered', 'cancelled'];
+  const statuses = ['pending', 'preparing', 'ready', 'onTheWay', 'inProgress', 'delivered', 'cancelled'];
   const sel = document.createElement('select');
   sel.className = 'input';
   sel.style.width = '160px';
@@ -24,9 +24,46 @@ function statusSelect(order) {
   return sel;
 }
 
+function courierSelect(order, couriers) {
+  const sel = document.createElement('select');
+  sel.className = 'input';
+  sel.style.width = '180px';
+
+  const optNone = document.createElement('option');
+  optNone.value = '';
+  optNone.textContent = '(unassigned)';
+  sel.appendChild(optNone);
+
+  (couriers || []).forEach((c) => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+
+  sel.value = order.courierId || (order.courier ? order.courier.id : '') || '';
+
+  sel.onchange = async () => {
+    try {
+      await apiFetch(`/admin/orders/${order.id}/courier`, {
+        method: 'PUT',
+        body: JSON.stringify({ courierId: sel.value ? sel.value : null }),
+      });
+      showToast('success', 'Courier updated');
+    } catch (e) {
+      showToast('error', e.message);
+    }
+  };
+
+  return sel;
+}
+
 async function loadOrders() {
   const tbody = qs('orders-tbody');
   tbody.innerHTML = '';
+
+  const couriers = await apiFetch('/delivery/couriers');
+  const activeCouriers = (couriers || []).filter((c) => c.isActive);
 
   const orders = await apiFetch('/admin/orders');
 
@@ -41,6 +78,9 @@ async function loadOrders() {
 
     const tdStatus = document.createElement('td');
     tdStatus.appendChild(statusSelect(o));
+
+    const tdCourier = document.createElement('td');
+    tdCourier.appendChild(courierSelect(o, activeCouriers));
 
     const tdTotal = document.createElement('td');
     tdTotal.textContent = String(o.total);
@@ -66,6 +106,7 @@ async function loadOrders() {
     tr.appendChild(tdId);
     tr.appendChild(tdUser);
     tr.appendChild(tdStatus);
+    tr.appendChild(tdCourier);
     tr.appendChild(tdTotal);
     tr.appendChild(tdItems);
     tr.appendChild(tdInv);

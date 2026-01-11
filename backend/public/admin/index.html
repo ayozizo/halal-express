@@ -24,6 +24,8 @@
         <a class="nav" href="#/categories">Categories</a>
         <a class="nav" href="#/products">Products</a>
         <a class="nav" href="#/orders">Orders</a>
+        <a class="nav" href="#/delivery">Delivery</a>
+        <a class="nav" href="#/payments">Payments</a>
         <a class="nav" href="#/invoices">Invoices</a>
         <a class="nav" href="#/users">Users</a>
       </aside>
@@ -47,6 +49,32 @@
               <div id="login-error" class="error" style="display:none"></div>
               <button class="btn" type="submit">Sign in</button>
             </form>
+          </div>
+        </section>
+
+        <section id="view-payments" class="view" style="display:none">
+          <div class="row" style="margin-bottom:12px">
+            <h2 style="margin:0">Payments</h2>
+            <div class="space"></div>
+            <button id="payments-refresh" class="btn secondary">Refresh</button>
+          </div>
+          <div class="card">
+            <div id="payments-error" class="error" style="display:none"></div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Id</th>
+                  <th>Order</th>
+                  <th>User</th>
+                  <th>Method</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody id="payments-tbody"></tbody>
+            </table>
           </div>
         </section>
 
@@ -150,7 +178,6 @@
             <table class="table">
               <thead>
                 <tr>
-                  <th>Image</th>
                   <th>Name</th>
                   <th>Price</th>
                   <th>Available</th>
@@ -187,9 +214,6 @@
             <div class="field">
               <label>Image URL</label>
               <input id="prod-imageUrl" class="input" />
-              <div style="margin-top:8px">
-                <img id="prod-imagePreview" alt="" style="width:240px;height:180px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;display:none" />
-              </div>
             </div>
             <div class="field">
               <label>Options JSON (array)</label>
@@ -218,6 +242,7 @@
                   <th>Id</th>
                   <th>User</th>
                   <th>Status</th>
+                  <th>Courier</th>
                   <th>Total</th>
                   <th>Items</th>
                   <th>Invoice</th>
@@ -226,6 +251,110 @@
               </thead>
               <tbody id="orders-tbody"></tbody>
             </table>
+          </div>
+        </section>
+
+        <section id="view-delivery" class="view" style="display:none">
+          <div class="row" style="margin-bottom:12px">
+            <h2 style="margin:0">Delivery</h2>
+            <div class="space"></div>
+            <button id="zones-refresh" class="btn secondary">Refresh zones</button>
+            <button id="couriers-refresh" class="btn secondary">Refresh couriers</button>
+          </div>
+          <div id="delivery-error" class="error" style="display:none"></div>
+
+          <div class="card" style="margin-bottom:12px">
+            <h3 style="margin-top:0">Delivery zones</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Postcode prefix</th>
+                  <th>Fee</th>
+                  <th>ETA (minutes)</th>
+                  <th>Active</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="zones-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="card" style="margin-bottom:12px">
+            <h3 style="margin-top:0">Add / Edit zone</h3>
+            <div class="row" style="margin-bottom:12px">
+              <div style="flex:2">
+                <label>Name</label>
+                <input id="zone-name" class="input" />
+              </div>
+              <div style="flex:1">
+                <label>Postcode prefix</label>
+                <input id="zone-prefix" class="input" />
+              </div>
+            </div>
+            <div class="row" style="margin-bottom:12px">
+              <div style="width:160px">
+                <label>Fee</label>
+                <input id="zone-fee" class="input" value="10" />
+              </div>
+              <div style="width:180px">
+                <label>ETA minutes</label>
+                <input id="zone-eta" class="input" value="60" />
+              </div>
+              <div style="width:180px">
+                <label>Active</label>
+                <select id="zone-active" class="input">
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              </div>
+              <div class="space"></div>
+              <button id="zone-save" class="btn">Save</button>
+              <button id="zone-clear" class="btn secondary">Clear</button>
+            </div>
+            <div class="muted">Editing zone id: <code id="zone-editing">(new)</code></div>
+          </div>
+
+          <div class="card" style="margin-bottom:12px">
+            <h3 style="margin-top:0">Couriers</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Active</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="couriers-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Add / Edit courier</h3>
+            <div class="row" style="margin-bottom:12px">
+              <div style="flex:2">
+                <label>Name</label>
+                <input id="courier-name" class="input" />
+              </div>
+              <div style="flex:2">
+                <label>Phone</label>
+                <input id="courier-phone" class="input" />
+              </div>
+              <div style="width:180px">
+                <label>Active</label>
+                <select id="courier-active" class="input">
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <button id="courier-save" class="btn">Save</button>
+              <button id="courier-clear" class="btn secondary">Clear</button>
+              <div class="space"></div>
+              <div class="muted">Editing courier id: <code id="courier-editing">(new)</code></div>
+            </div>
           </div>
         </section>
 
@@ -285,6 +414,8 @@
     <script src="./js/categories.js"></script>
     <script src="./js/products.js"></script>
     <script src="./js/orders.js"></script>
+    <script src="./js/delivery.js"></script>
+    <script src="./js/payments.js"></script>
     <script src="./js/invoices.js"></script>
     <script src="./js/users.js"></script>
     <script src="./js/router.js"></script>

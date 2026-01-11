@@ -9,9 +9,25 @@ datasource db {
 
 enum OrderStatus {
   pending
+  preparing
+  ready
+  onTheWay
   inProgress
   delivered
   cancelled
+}
+
+enum PaymentStatus {
+  unpaid
+  pending
+  paid
+  failed
+  refunded
+}
+
+enum PaymentMethod {
+  cod
+  stripe
 }
 
 model User {
@@ -26,6 +42,103 @@ model User {
   updatedAt    DateTime @updatedAt
 
   orders Order[]
+
+  deviceTokens DeviceToken[]
+
+  addresses Address[]
+  cart      Cart?
+}
+
+model DeviceToken {
+  id         String   @id @default(uuid())
+  userId     String
+  token      String   @unique
+  platform   String
+  deviceId   String?
+  isActive   Boolean  @default(true)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([platform])
+  @@index([isActive])
+}
+
+model Address {
+  id           String   @id @default(uuid())
+  userId       String
+  label        String?
+  line1        String
+  line2        String?
+  city         String?
+  area         String?
+  postcode     String
+  country      String   @default("SA")
+  phone        String?
+  instructions String?
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([postcode])
+}
+
+model DeliveryZone {
+  id            String   @id @default(uuid())
+  name          String
+  postcodePrefix String
+  fee           Decimal  @db.Decimal(10, 2)
+  etaMinutes    Int      @default(60)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([postcodePrefix])
+  @@index([isActive])
+}
+
+model Courier {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([isActive])
+}
+
+model Cart {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+}
+
+model CartItem {
+  id               String   @id @default(uuid())
+  cartId           String
+  productId        String
+  selectedOptions  Json     @default("{}")
+  quantity         Int
+  extraInstructions String?
+  createdAt        DateTime @default(now())
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([cartId])
+  @@index([productId])
 }
 
 model Category {
@@ -62,6 +175,8 @@ model Product {
   category    Category @relation("ProductCategory", fields: [categoryId], references: [id])
   subCategory Category @relation("ProductSubCategory", fields: [subCategoryId], references: [id])
 
+  cartItems CartItem[]
+
   orderItems OrderItem[]
 
   @@index([categoryId])
@@ -75,19 +190,44 @@ model Order {
   deliveryFee     Decimal     @db.Decimal(10, 2)
   total           Decimal     @db.Decimal(10, 2)
   deliveryAddress String
+  deliveryPostcode String?
+  deliveryArea     String?
   deliveryPhone   String
   deliveryTime    DateTime
+  deliveryInstructions String?
+  estimatedDeliveryMinutes Int?
   status          OrderStatus @default(pending)
+  statusUpdatedAt DateTime    @default(now())
   paymentIntentId String?
+  paymentMethod   PaymentMethod @default(cod)
+  paymentStatus   PaymentStatus @default(unpaid)
+  courierId       String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
   user  User       @relation(fields: [userId], references: [id])
   items OrderItem[]
 
+  courier Courier? @relation(fields: [courierId], references: [id])
+  payments Payment[]
+  statusLogs OrderStatusLog[]
+
   invoice Invoice?
 
   @@index([userId])
+  @@index([status])
+}
+
+model OrderStatusLog {
+  id            String      @id @default(uuid())
+  orderId       String
+  status        OrderStatus
+  changedAt     DateTime    @default(now())
+  changedByUserId String?
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
   @@index([status])
 }
 
@@ -113,8 +253,29 @@ model Invoice {
   orderId   String   @unique
   number    String   @unique
   currency  String   @default("SAR")
+  vatRate   Decimal  @db.Decimal(5, 4) @default(0)
+  vatAmount Decimal  @db.Decimal(10, 2) @default(0)
   issuedAt  DateTime @default(now())
   createdAt DateTime @default(now())
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  orderId    String
+  method     PaymentMethod
+  status     PaymentStatus
+  amount     Decimal       @db.Decimal(10, 2)
+  currency   String        @default("SAR")
+  provider   String?
+  providerRef String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
+  @@index([method])
 }

@@ -7,6 +7,8 @@ const state = {
   prodSubCats: [],
   prodCategoryId: '',
   prodSubCategoryId: '',
+  zoneEditingId: null,
+  courierEditingId: null,
 };
 
 function hideAllViews() {

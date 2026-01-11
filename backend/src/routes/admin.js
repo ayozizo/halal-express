@@ -42,6 +42,9 @@ router.get('/orders', async (req, res) => {
       items: true,
       user: { select: { id: true, email: true, name: true, phone: true, address: true, isAdmin: true, createdAt: true } },
       invoice: true,
+      payments: true,
+      statusLogs: true,
+      courier: true,
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -80,7 +83,7 @@ router.put(
   validate(
     z.object({
       body: z.object({
-        status: z.enum(['pending', 'inProgress', 'delivered', 'cancelled']),
+        status: z.enum(['pending', 'preparing', 'ready', 'onTheWay', 'inProgress', 'delivered', 'cancelled']),
       }),
       query: z.any(),
       params: z.object({ id: z.string().uuid() }),
@@ -90,10 +93,55 @@ router.put(
     const { id } = req.validated.params;
     const { status } = req.validated.body;
 
+    const updated = await prisma.$transaction(async (tx) => {
+      const order = await tx.order.update({
+        where: { id },
+        data: {
+          status,
+          statusUpdatedAt: new Date(),
+        },
+        include: { items: true, user: true, invoice: true, payments: true, statusLogs: true, courier: true },
+      });
+
+      await tx.orderStatusLog.create({
+        data: {
+          orderId: order.id,
+          status,
+          changedByUserId: req.user.id,
+        },
+      });
+
+      return order;
+    });
+
+    res.json(updated);
+  },
+);
+
+router.put(
+  '/orders/:id/courier',
+  validate(
+    z.object({
+      body: z.object({
+        courierId: z.string().uuid().nullable(),
+      }),
+      query: z.any(),
+      params: z.object({ id: z.string().uuid() }),
+    }),
+  ),
+  async (req, res) => {
+    const { id } = req.validated.params;
+    const { courierId } = req.validated.body;
+
+    if (courierId) {
+      const exists = await prisma.courier.findUnique({ where: { id: courierId } });
+      if (!exists) return res.status(400).json({ error: 'Courier not found' });
+    }
+
     const updated = await prisma.order.update({
       where: { id },
-      data: { status },
-      include: { items: true, user: true, invoice: true },
+      data: { courierId: courierId ?? null },
+      include: { items: true, user: true, invoice: true, payments: true, statusLogs: true, courier: true },
     });
 
     res.json(updated);

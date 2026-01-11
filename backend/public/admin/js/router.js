@@ -11,6 +11,8 @@ function route() {
   if (path.startsWith('/categories')) return showCategories();
   if (path.startsWith('/products')) return showProducts();
   if (path.startsWith('/orders')) return showOrders();
+  if (path.startsWith('/delivery')) return showDelivery();
+  if (path.startsWith('/payments')) return showPayments();
   if (path.startsWith('/invoices')) return showInvoices();
   if (path.startsWith('/users')) return showUsers();
 

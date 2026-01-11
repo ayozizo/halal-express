@@ -105,7 +105,13 @@ router.post(
     }),
   ),
   async (req, res) => {
-    res.json({ ok: true });
+    const { email } = req.validated.body;
+    const normalized = email.trim().toLowerCase();
+
+    const exists = await prisma.user.findUnique({ where: { email: normalized }, select: { id: true } });
+    if (!exists) return res.json({ ok: true });
+
+    return res.json({ ok: true });
   },
 );
 

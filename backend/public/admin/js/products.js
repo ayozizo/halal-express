@@ -4,23 +4,9 @@ function clearProdForm() {
   qs('prod-name').value = '';
   qs('prod-description').value = '';
   qs('prod-imageUrl').value = '';
-  qs('prod-imagePreview').style.display = 'none';
-  qs('prod-imagePreview').src = '';
   qs('prod-price').value = '0';
   qs('prod-available').value = 'true';
   qs('prod-options').value = '[]';
-}
-
-function setProdImagePreview(url) {
-  const img = qs('prod-imagePreview');
-  const u = (url || '').trim();
-  if (!u) {
-    img.style.display = 'none';
-    img.src = '';
-    return;
-  }
-  img.style.display = 'block';
-  img.src = u;
 }
 
 function parseOptionsJson(value) {
@@ -80,24 +66,6 @@ async function loadProducts() {
   items.forEach((p) => {
     const tr = document.createElement('tr');
 
-    const tdImg = document.createElement('td');
-    tdImg.className = 'image-cell';
-    if (p.imageUrl) {
-      const img = document.createElement('img');
-      img.className = 'prod-thumb';
-      img.src = p.imageUrl;
-      img.alt = '';
-      img.loading = 'lazy';
-      img.referrerPolicy = 'no-referrer';
-      img.onerror = () => {
-        img.remove();
-        tdImg.textContent = '-';
-      };
-      tdImg.appendChild(img);
-    } else {
-      tdImg.textContent = '-';
-    }
-
     const tdName = document.createElement('td');
     tdName.textContent = p.name;
 
@@ -108,7 +76,8 @@ async function loadProducts() {
     tdAvail.textContent = String(p.isAvailable);
 
     const tdActions = document.createElement('td');
-    tdActions.className = 'actions-cell';
+    tdActions.style.display = 'flex';
+    tdActions.style.gap = '8px';
 
     const btnEdit = document.createElement('button');
     btnEdit.className = 'btn secondary small';
@@ -119,7 +88,6 @@ async function loadProducts() {
       qs('prod-name').value = p.name || '';
       qs('prod-description').value = p.description || '';
       qs('prod-imageUrl').value = p.imageUrl || '';
-      setProdImagePreview(p.imageUrl || '');
       qs('prod-price').value = String(p.basePrice || '0');
       qs('prod-available').value = String(Boolean(p.isAvailable));
       qs('prod-options').value = JSON.stringify(p.optionsJson || [], null, 2);
@@ -142,7 +110,6 @@ async function loadProducts() {
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);
 
-    tr.appendChild(tdImg);
     tr.appendChild(tdName);
     tr.appendChild(tdPrice);
     tr.appendChild(tdAvail);
@@ -199,12 +166,6 @@ async function saveProduct() {
 async function showProducts() {
   showView('view-products');
   qs('prod-error').style.display = 'none';
-
-  const imageUrlEl = qs('prod-imageUrl');
-  if (imageUrlEl) {
-    imageUrlEl.oninput = (e) => setProdImagePreview(e.target.value);
-    setProdImagePreview(imageUrlEl.value);
-  }
 
   try {
     await loadProdCategories();

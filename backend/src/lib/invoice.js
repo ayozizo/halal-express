@@ -49,6 +49,11 @@ function buildInvoicePdf({ invoice, order, user }) {
   doc.fontSize(11);
   doc.text(`Subtotal: ${money(order.subtotal)} ${invoice.currency}`);
   doc.text(`Delivery fee: ${money(order.deliveryFee)} ${invoice.currency}`);
+  const vatAmount = invoice.vatAmount !== undefined && invoice.vatAmount !== null ? Number(invoice.vatAmount) : 0;
+  const vatRate = invoice.vatRate !== undefined && invoice.vatRate !== null ? Number(invoice.vatRate) : 0;
+  if (vatRate > 0 || vatAmount > 0) {
+    doc.text(`VAT (${(vatRate * 100).toFixed(2)}%): ${money(vatAmount)} ${invoice.currency}`);
+  }
   doc.fontSize(12).text(`Total: ${money(order.total)} ${invoice.currency}`, { bold: true });
 
   doc.moveDown(2);

@@ -85,6 +85,8 @@ async function main() {
     const nextUrl = pickImage(p);
     const shouldUpdate = true;
 
+    if (!shouldUpdate) continue;
+
     await prisma.product.update({
       where: { id: p.id },
       data: { imageUrl: nextUrl },

@@ -87,6 +87,17 @@ function bindEvents() {
   // orders
   qs('orders-refresh').addEventListener('click', () => loadOrders().catch((e) => showToast('error', e.message)));
 
+  // delivery
+  qs('zones-refresh').addEventListener('click', () => loadZones().catch((e) => showToast('error', e.message)));
+  qs('couriers-refresh').addEventListener('click', () => loadCouriers().catch((e) => showToast('error', e.message)));
+  qs('zone-save').addEventListener('click', () => saveZone());
+  qs('zone-clear').addEventListener('click', () => clearZoneForm());
+  qs('courier-save').addEventListener('click', () => saveCourier());
+  qs('courier-clear').addEventListener('click', () => clearCourierForm());
+
+  // payments
+  qs('payments-refresh').addEventListener('click', () => loadPayments().catch((e) => showToast('error', e.message)));
+
   // invoices
   qs('inv-refresh').addEventListener('click', () => loadInvoices().catch((e) => showToast('error', e.message)));
 

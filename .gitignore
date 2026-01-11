@@ -1,4 +1,6 @@
 node_modules/
+backend/node_modules/
+backend_OLD_*/
 .env
 .env.*
 !.env.example
