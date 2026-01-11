@@ -29,9 +29,24 @@ router.get('/products', async (req, res) => {
   const subCategoryId = req.query.subCategoryId ? String(req.query.subCategoryId) : null;
   if (!subCategoryId) return res.json([]);
 
+  res.set('Cache-Control', 'no-store');
+
   const products = await prisma.product.findMany({
     where: { subCategoryId },
     orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      imageUrl: true,
+      basePrice: true,
+      isAvailable: true,
+      optionsJson: true,
+      categoryId: true,
+      subCategoryId: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
   res.json(products);
 });

@@ -70,10 +70,11 @@ async function loadProducts() {
     const nameWrap = document.createElement('div');
     nameWrap.className = 'name-with-thumb';
 
-    if (p.imageUrl) {
+    const imgUrl = p.imageUrl || p.imageURL || p.image || null;
+    if (imgUrl) {
       const img = document.createElement('img');
       img.className = 'thumb';
-      img.src = p.imageUrl;
+      img.src = imgUrl;
       img.alt = p.name || 'Product';
       img.loading = 'lazy';
       img.referrerPolicy = 'no-referrer';
