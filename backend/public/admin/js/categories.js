@@ -30,6 +30,22 @@ async function loadCategories() {
     const tr = document.createElement('tr');
 
     const tdName = document.createElement('td');
+    const nameWrap = document.createElement('div');
+    nameWrap.className = 'name-with-thumb';
+
+    if (c.imageUrl) {
+      const img = document.createElement('img');
+      img.className = 'thumb';
+      img.src = c.imageUrl;
+      img.alt = c.name || 'Category';
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      img.onerror = () => {
+        img.style.display = 'none';
+      };
+      nameWrap.appendChild(img);
+    }
+
     const btnOpen = document.createElement('button');
     btnOpen.className = 'btn secondary small';
     btnOpen.textContent = c.name;
@@ -40,7 +56,8 @@ async function loadCategories() {
       clearCatForm();
       showCategories();
     };
-    tdName.appendChild(btnOpen);
+    nameWrap.appendChild(btnOpen);
+    tdName.appendChild(nameWrap);
 
     const tdActive = document.createElement('td');
     tdActive.textContent = String(c.isActive);

@@ -67,7 +67,27 @@ async function loadProducts() {
     const tr = document.createElement('tr');
 
     const tdName = document.createElement('td');
-    tdName.textContent = p.name;
+    const nameWrap = document.createElement('div');
+    nameWrap.className = 'name-with-thumb';
+
+    if (p.imageUrl) {
+      const img = document.createElement('img');
+      img.className = 'thumb';
+      img.src = p.imageUrl;
+      img.alt = p.name || 'Product';
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      img.onerror = () => {
+        img.style.display = 'none';
+      };
+      nameWrap.appendChild(img);
+    }
+
+    const nameText = document.createElement('span');
+    nameText.textContent = p.name;
+    nameWrap.appendChild(nameText);
+
+    tdName.appendChild(nameWrap);
 
     const tdPrice = document.createElement('td');
     tdPrice.textContent = p.basePrice;
