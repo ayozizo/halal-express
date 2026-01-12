@@ -272,7 +272,7 @@ router.post(
           method: paymentMethod,
           status: paymentMethod === 'cod' ? 'pending' : 'unpaid',
           amount: String(order.total),
-          currency: 'SAR',
+          currency: 'USD',
           provider: paymentMethod,
         },
       });
@@ -281,7 +281,7 @@ router.post(
         data: {
           orderId: order.id,
           number: invoiceNumber,
-          currency: 'SAR',
+          currency: 'USD',
           vatRate: vatRate.toFixed(4),
           vatAmount: vatAmount.toFixed(2),
         },
@@ -328,7 +328,7 @@ router.get(
     }
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename=${order.invoice.number}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=${order.invoice.number}.pdf`);
 
     const doc = buildInvoicePdf({ invoice: order.invoice, order, user: order.user });
     doc.pipe(res);

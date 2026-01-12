@@ -259,7 +259,7 @@ model Invoice {
   id        String   @id @default(uuid())
   orderId   String   @unique
   number    String   @unique
-  currency  String   @default("SAR")
+  currency  String   @default("USD")
   vatRate   Decimal  @db.Decimal(5, 4) @default(0)
   vatAmount Decimal  @db.Decimal(10, 2) @default(0)
   issuedAt  DateTime @default(now())
@@ -274,7 +274,7 @@ model Payment {
   method     PaymentMethod
   status     PaymentStatus
   amount     Decimal       @db.Decimal(10, 2)
-  currency   String        @default("SAR")
+  currency   String        @default("USD")
   provider   String?
   providerRef String?
   createdAt  DateTime      @default(now())

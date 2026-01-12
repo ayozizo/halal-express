@@ -139,7 +139,7 @@ router.post(
 
     const intent = await stripe.paymentIntents.create({
       amount,
-      currency: 'sar',
+      currency: 'usd',
       automatic_payment_methods: { enabled: true },
       metadata: {
         orderId: order.id,
@@ -165,7 +165,7 @@ router.post(
             method: 'stripe',
             status: 'pending',
             amount: String(order.total),
-            currency: 'SAR',
+            currency: 'USD',
             provider: 'stripe',
             providerRef: intent.id,
           },
@@ -298,7 +298,7 @@ router.post(
           method: 'cod',
           status: 'pending',
           amount: String(order.total),
-          currency: 'SAR',
+          currency: 'USD',
           provider: 'cod',
         },
       });

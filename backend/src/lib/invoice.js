@@ -14,6 +14,13 @@ function money(v) {
   return n.toFixed(2);
 }
 
+function currencyLabel(code) {
+  if (!code) return '';
+  const c = String(code).toUpperCase();
+  if (c === 'USD') return '$';
+  return c;
+}
+
 function buildInvoicePdf({ invoice, order, user }) {
   const doc = new PDFDocument({ size: 'A4', margin: 48 });
 
@@ -37,8 +44,9 @@ function buildInvoicePdf({ invoice, order, user }) {
   order.items.forEach((it) => {
     const snap = it.productSnapshot || {};
     doc.fontSize(11).text(`${snap.name ?? 'Item'} x${it.quantity}`);
-    doc.fontSize(10).fillColor('#444').text(`Unit: ${money(it.price)} ${invoice.currency}`);
-    doc.fontSize(10).fillColor('#444').text(`Line: ${money(Number(it.price) * it.quantity)} ${invoice.currency}`);
+    const cur = currencyLabel(invoice.currency);
+    doc.fontSize(10).fillColor('#444').text(`Unit: ${cur}${money(it.price)}`);
+    doc.fontSize(10).fillColor('#444').text(`Line: ${cur}${money(Number(it.price) * it.quantity)}`);
     doc.fillColor('black');
     doc.moveDown(0.5);
   });
@@ -47,14 +55,15 @@ function buildInvoicePdf({ invoice, order, user }) {
   doc.fontSize(12).text('Totals', { underline: true });
   doc.moveDown(0.5);
   doc.fontSize(11);
-  doc.text(`Subtotal: ${money(order.subtotal)} ${invoice.currency}`);
-  doc.text(`Delivery fee: ${money(order.deliveryFee)} ${invoice.currency}`);
+  const cur = currencyLabel(invoice.currency);
+  doc.text(`Subtotal: ${cur}${money(order.subtotal)}`);
+  doc.text(`Delivery fee: ${cur}${money(order.deliveryFee)}`);
   const vatAmount = invoice.vatAmount !== undefined && invoice.vatAmount !== null ? Number(invoice.vatAmount) : 0;
   const vatRate = invoice.vatRate !== undefined && invoice.vatRate !== null ? Number(invoice.vatRate) : 0;
   if (vatRate > 0 || vatAmount > 0) {
-    doc.text(`VAT (${(vatRate * 100).toFixed(2)}%): ${money(vatAmount)} ${invoice.currency}`);
+    doc.text(`VAT (${(vatRate * 100).toFixed(2)}%): ${cur}${money(vatAmount)}`);
   }
-  doc.fontSize(12).text(`Total: ${money(order.total)} ${invoice.currency}`, { bold: true });
+  doc.fontSize(12).text(`Total: ${cur}${money(order.total)}`, { bold: true });
 
   doc.moveDown(2);
   doc.fontSize(10).fillColor('#666').text('Thank you for your order.', { align: 'center' });
