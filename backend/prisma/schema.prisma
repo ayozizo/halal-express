@@ -79,6 +79,8 @@ model Address {
   country      String   @default("SA")
   phone        String?
   instructions String?
+  lat          Float?
+  lng          Float?
   isDefault    Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -108,6 +110,9 @@ model Courier {
   name      String
   phone     String?
   isActive  Boolean  @default(true)
+  lastLat   Float?
+  lastLng   Float?
+  lastLocationAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -192,6 +197,8 @@ model Order {
   deliveryAddress String
   deliveryPostcode String?
   deliveryArea     String?
+  deliveryLat      Float?
+  deliveryLng      Float?
   deliveryPhone   String
   deliveryTime    DateTime
   deliveryInstructions String?

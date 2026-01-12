@@ -17,6 +17,8 @@ const addressBody = z.object({
   country: z.string().min(2).max(2).optional().default('SA'),
   phone: z.string().min(0).max(50).nullable().optional(),
   instructions: z.string().min(0).max(500).nullable().optional(),
+  lat: z.number().finite().min(-90).max(90).nullable().optional(),
+  lng: z.number().finite().min(-180).max(180).nullable().optional(),
   isDefault: z.boolean().optional().default(false),
 });
 
@@ -57,6 +59,8 @@ router.post(
           country: d.country ?? 'SA',
           phone: d.phone ?? null,
           instructions: d.instructions ?? null,
+          lat: d.lat ?? null,
+          lng: d.lng ?? null,
           isDefault: d.isDefault ?? false,
         },
       });
@@ -99,6 +103,8 @@ router.put(
           ...(d.country !== undefined ? { country: d.country } : {}),
           ...(d.phone !== undefined ? { phone: d.phone } : {}),
           ...(d.instructions !== undefined ? { instructions: d.instructions } : {}),
+          ...(d.lat !== undefined ? { lat: d.lat } : {}),
+          ...(d.lng !== undefined ? { lng: d.lng } : {}),
           ...(d.isDefault !== undefined ? { isDefault: d.isDefault } : {}),
         },
       });

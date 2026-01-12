@@ -74,6 +74,8 @@ router.post(
         postcode: z.string().min(2).max(30).optional(),
         area: z.string().min(0).max(80).nullable().optional(),
         instructions: z.string().min(0).max(500).nullable().optional(),
+        lat: z.number().finite().min(-90).max(90).nullable().optional(),
+        lng: z.number().finite().min(-180).max(180).nullable().optional(),
 
         // Payment
         paymentMethod: z.enum(['cod', 'stripe']).optional().default('cod'),
@@ -94,6 +96,8 @@ router.post(
       postcode,
       area,
       instructions,
+      lat,
+      lng,
       paymentMethod,
     } = req.validated.body;
 
@@ -108,6 +112,8 @@ router.post(
     let resolvedPostcode = postcode;
     let resolvedArea = area ?? null;
     let resolvedInstructions = instructions ?? notes ?? null;
+    let resolvedLat = lat ?? null;
+    let resolvedLng = lng ?? null;
 
     if (addressId) {
       const addr = await prisma.address.findUnique({ where: { id: addressId } });
@@ -131,6 +137,8 @@ router.post(
       resolvedPostcode = addr.postcode;
       resolvedArea = addr.area ?? resolvedArea;
       resolvedInstructions = addr.instructions ?? resolvedInstructions;
+      resolvedLat = addr.lat ?? resolvedLat;
+      resolvedLng = addr.lng ?? resolvedLng;
     }
 
     if (!resolvedAddress || !resolvedPhone) {
@@ -235,6 +243,8 @@ router.post(
           deliveryAddress: resolvedAddress,
           deliveryPostcode: resolvedPostcode ?? null,
           deliveryArea: resolvedArea ?? null,
+          deliveryLat: resolvedLat,
+          deliveryLng: resolvedLng,
           deliveryPhone: resolvedPhone,
           deliveryTime: dt,
           deliveryInstructions: resolvedInstructions,
@@ -322,6 +332,53 @@ router.get(
 
     const doc = buildInvoicePdf({ invoice: order.invoice, order, user: order.user });
     doc.pipe(res);
+  },
+);
+
+router.get(
+  '/:id/tracking',
+  requireAuth(),
+  validate(
+    z.object({
+      body: z.any(),
+      query: z.any(),
+      params: z.object({ id: z.string().uuid() }),
+    }),
+  ),
+  async (req, res) => {
+    const { id } = req.validated.params;
+
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { courier: true },
+    });
+
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (order.userId !== req.user.id && !req.user.isAdmin) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    res.set('Cache-Control', 'no-store');
+
+    res.json({
+      orderId: order.id,
+      status: order.status,
+      destination: {
+        lat: order.deliveryLat ?? null,
+        lng: order.deliveryLng ?? null,
+        address: order.deliveryAddress,
+      },
+      courier: order.courier
+        ? {
+            id: order.courier.id,
+            name: order.courier.name,
+            phone: order.courier.phone,
+            lat: order.courier.lastLat ?? null,
+            lng: order.courier.lastLng ?? null,
+            at: order.courier.lastLocationAt ?? null,
+          }
+        : null,
+    });
   },
 );
 

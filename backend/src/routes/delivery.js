@@ -55,6 +55,36 @@ router.post(
   },
 );
 
+router.post(
+  '/couriers/:id/location',
+  requireAuth(),
+  requireAdmin(),
+  validate(
+    z.object({
+      body: z.object({
+        lat: z.number().finite().min(-90).max(90),
+        lng: z.number().finite().min(-180).max(180),
+      }),
+      query: z.any(),
+      params: z.object({ id: z.string().uuid() }),
+    }),
+  ),
+  async (req, res) => {
+    const { id } = req.validated.params;
+    const { lat, lng } = req.validated.body;
+
+    const updated = await prisma.courier.update({
+      where: { id },
+      data: {
+        lastLat: lat,
+        lastLng: lng,
+        lastLocationAt: new Date(),
+      },
+    });
+    res.json(updated);
+  },
+);
+
 router.put(
   '/zones/:id',
   requireAuth(),
